@@ -131,6 +131,8 @@ export async function GET() {
           id: buildingId,
           name: buildingInfo.name,
           status: hasAvailableRoom ? 'available' : 'unavailable',
+          lat: buildingInfo.lat,
+          lng: buildingInfo.lng,
           rooms: validRooms,
         } satisfies Building
       })

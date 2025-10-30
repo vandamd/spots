@@ -66,3 +66,10 @@ body {
 .alert {
   border-color: #3f3f46;
 }
+
+#map-container {
+  height: 100%;
+  width: 100%;
+  background-color: #27272a;
+  border-radius: 20px;
+}

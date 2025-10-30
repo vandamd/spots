@@ -6,6 +6,7 @@ import { BuildingList } from '@/components/BuildingList'
 import { Loading } from '@/components/Loading'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Map } from '@/components/Map'
 import { AlertCircle, Info } from 'lucide-react'
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [fetchTimestamp, setFetchTimestamp] = useState<Date>(new Date())
+  const [activeBuildingId, setActiveBuildingId] = useState<number | null>(null)
 
   const fetchSpaceData = () => {
     fetch('/api/spaces')
@@ -47,11 +49,27 @@ export default function Home() {
   const isWeekend = now.getDay() === 0 || now.getDay() === 6
   const isLateNight = hour >= 22 || hour < 6
 
+  const handleMarkerClick = (buildingId: number) => {
+    setActiveBuildingId(buildingId)
+  }
+
+  const handleSetActiveBuildingId = (id: number | null) => {
+    setActiveBuildingId(id)
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-zinc-900 text-zinc-100">
+        <Loading />
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col sm:flex-row h-screen bg-zinc-900 text-zinc-100 gap-2 p-4">
       <div className="basis-2/5 order-last sm:order-first flex flex-col">
         <div className="h-14 pl-2 pr-4 flex items-center shrink-0">
-          <p className="text-3xl font-medium">Bristol Study Spaces</p>
+          <p className="text-3xl font-medium">Bristol Teaching Spaces</p>
         </div>
 
         <ScrollArea className="flex-1 py-4 sm:px-0 sm:py-2">
@@ -75,8 +93,6 @@ export default function Home() {
           </Alert>
         )}
 
-        {loading && <Loading />}
-
         {error && (
           <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
@@ -85,15 +101,12 @@ export default function Home() {
           </Alert>
         )}
 
-        {!loading && !error && <BuildingList buildings={buildings} fetchTimestamp={fetchTimestamp} />}
+        {!error && <BuildingList buildings={buildings} fetchTimestamp={fetchTimestamp} activeBuildingId={activeBuildingId} setActiveBuildingId={handleSetActiveBuildingId} />}
         </ScrollArea>
       </div>
 
-      <div className="basis-3/5 h-[60vh] sm:h-full p-2 sm:p-0 rounded-[20px] flex items-center justify-center bg-zinc-800">
-        <div className="text-center text-zinc-500">
-          <div className="text-6xl mb-4">🗺️</div>
-          <p className="text-lg">Map coming soon</p>
-        </div>
+      <div className="basis-3/5 h-[60vh] sm:h-full p-2 sm:p-0 rounded-[20px]">
+        {!error && <Map buildings={buildings} onBuildingClick={handleMarkerClick} />}
       </div>
     </div>
   )

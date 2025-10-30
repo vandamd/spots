@@ -12,6 +12,8 @@ import { Badge } from '@/components/ui/badge'
 interface BuildingListProps {
   buildings: Building[]
   fetchTimestamp: Date
+  activeBuildingId: number | null
+  setActiveBuildingId: (id: number | null) => void
 }
 
 function formatTime(isoString: string, fetchTimestamp: Date): string {
@@ -28,7 +30,7 @@ function formatTime(isoString: string, fetchTimestamp: Date): string {
   })
 }
 
-export function BuildingList({ buildings, fetchTimestamp }: BuildingListProps) {
+export function BuildingList({ buildings, fetchTimestamp, activeBuildingId, setActiveBuildingId }: BuildingListProps) {
   if (buildings.length === 0) {
     return (
       <div className="p-4 text-center text-muted-foreground">
@@ -38,7 +40,20 @@ export function BuildingList({ buildings, fetchTimestamp }: BuildingListProps) {
   }
 
   return (
-    <Accordion type="single" collapsible className="pl-2 pr-4 w-full">
+    <Accordion
+      type="single"
+      collapsible
+      className="pl-2 pr-4 w-full"
+      value={activeBuildingId ? `building-${activeBuildingId}` : undefined}
+      onValueChange={(value) => {
+        if (value) {
+          const buildingId = parseInt(value.replace('building-', ''))
+          setActiveBuildingId(buildingId)
+        } else {
+          setActiveBuildingId(null)
+        }
+      }}
+    >
       {buildings.map((building) => {
         const totalRooms = building.rooms.length
         const availableNowCount = building.rooms.filter((room) =>
@@ -52,7 +67,7 @@ export function BuildingList({ buildings, fetchTimestamp }: BuildingListProps) {
             : 'unavailable'
 
         return (
-        <AccordionItem key={building.id} value={`building-${building.id}`}>
+        <AccordionItem key={building.id} value={`building-${building.id}`} id={`building-${building.id}`}>
           <AccordionTrigger className="py-4 text-lg hover:cursor-pointer underline-offset-8">
             <div className="flex items-center justify-between w-[95%]">
               <span className="text-left flex-1 hover:underline">{building.name}</span>

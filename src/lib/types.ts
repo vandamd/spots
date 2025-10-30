@@ -2,6 +2,8 @@ export interface Building {
   id: number
   name: string
   status: 'available' | 'unavailable'
+  lat: number
+  lng: number
   rooms: Room[]
 }
 
