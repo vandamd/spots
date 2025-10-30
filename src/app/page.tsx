@@ -23,6 +23,7 @@ export default function Home() {
       .then((data) => {
         setBuildings(data.buildings)
         setFetchTimestamp(new Date())
+        setError(null)
         setLoading(false)
       })
       .catch((err) => {
