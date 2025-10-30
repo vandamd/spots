@@ -131,7 +131,7 @@ export default function Home() {
               <div className="space-y-3 text-sm text-zinc-400">
                 <p>Study seat and teaching space availability at the University of Bristol.</p>
                 <p>Made with 💛 by <a href="https://vandamdinh.com" target="_blank" className="text-white">Vandam</a>! You can view the source code <a href="https://github.com/vandamd/spots" target="_blank" className="text-white">here</a>.</p>
-                <p>Largely inspired by <a href="https://spots.aksharbarot.com/" target="_blank" className="text-white">Spots</a> by Akshar Barot. I've adapted this site to use the endpoints found <a href="https://www.bris.ac.uk/where-is-my/find/" className="text-white">here</a>.</p>
+                <p>Largely inspired by <a href="https://spots.aksharbarot.com/" target="_blank" className="text-white">Spots</a> by Akshar Barot. I've adapted this site to use the endpoints found <a href="https://www.bris.ac.uk/where-is-my/find/" target="_blank" className="text-white">here</a>.</p>
                 <p>The closing times and availability of rooms may be wrong. Please double check :)</p>
                 <p>Any feedback? Let me know via <a href="mailto:ep21170@bristol.ac.uk" className="text-white">email</a>.</p>
               </div>
