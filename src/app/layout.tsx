@@ -9,7 +9,7 @@ const tiktokSans = TikTok_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Bristol University Spots",
+  title: "Spots",
   description: "University of Bristol study seat and teaching space availability app",
 };
 

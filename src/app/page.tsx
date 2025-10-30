@@ -105,7 +105,7 @@ export default function Home() {
     <div className="flex flex-col sm:flex-row p-2 lg:p-4 h-screen bg-zinc-900 text-zinc-100 gap-0 md:gap-2">
       <div className="basis-2/5 order-last sm:order-first flex-1 overflow-hidden sm:flex sm:flex-col py-4 sm:px-0 sm:py-2">
         <div className="h-auto pl-2 pr-4 mb-6 lg:mb-4 flex items-center justify-between gap-4 shrink-0">
-          <p className="text-3xl font-medium">Bristol University Spots</p>
+          <p className="text-3xl font-medium">University of Bristol Spots</p>
           <Dialog>
             <DialogTrigger asChild>
               <button
