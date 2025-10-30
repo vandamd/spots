@@ -5,6 +5,7 @@ export interface Building {
   lat: number
   lng: number
   rooms: Room[]
+  studySpaces: BuildingStudySpace[]
 }
 
 export interface Room {
@@ -20,6 +21,14 @@ export interface TimeSlot {
   status: 'free' | 'booked'
 }
 
+export interface BuildingStudySpace {
+  id: number
+  name: string
+  available: number | null
+  capacity: number | null
+  updatedAt: string | null
+}
+
 export interface ApiBuildingResponse {
   id: number
   topdeskUnid: string
@@ -31,7 +40,7 @@ export interface ApiBuildingResponse {
   link: string | null
   studySpacesOption: string
   computerRooms: ApiRoom[]
-  studySpaces: unknown[]
+  studySpaces: ApiStudySpace[]
   freeRooms: ApiRoom[]
   buildingStudySpaceCapacity: number
 }
@@ -54,3 +63,27 @@ export interface ApiBooking {
 }
 
 export type ApiRoomStatsResponse = Record<string, ApiBooking[]>
+
+export interface ApiStudySpace {
+  id: number
+  name: string | null
+  buildingId: number
+  spaces: number | null
+  notes?: string | null
+  sortOrder?: number | null
+}
+
+export interface ApiStudySpaceStatsEntry {
+  id: number
+  studySpaceId: number
+  freeDesks: number | null
+  datetime: string | null
+  event: unknown
+  totalDesks: number | null
+  notes: string | null
+  updatedBy: string | null
+  studySpaceName: string | null
+  buildingName: string | null
+}
+
+export type ApiStudySpaceStatsResponse = Record<string, ApiStudySpaceStatsEntry>

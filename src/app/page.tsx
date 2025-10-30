@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { Building } from '@/lib/types'
 import { BuildingList } from '@/components/BuildingList'
 import { Loading } from '@/components/Loading'
@@ -14,7 +14,8 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [fetchTimestamp, setFetchTimestamp] = useState<Date>(new Date())
-  const [activeBuildingId, setActiveBuildingId] = useState<number | null>(null)
+  const [activeStudyBuildingId, setActiveStudyBuildingId] = useState<number | null>(null)
+  const [activeRoomBuildingId, setActiveRoomBuildingId] = useState<number | null>(null)
 
   const fetchSpaceData = () => {
     fetch('/api/spaces')
@@ -49,12 +50,38 @@ export default function Home() {
   const isWeekend = now.getDay() === 0 || now.getDay() === 6
   const isLateNight = hour >= 22 || hour < 6
 
-  const handleMarkerClick = (buildingId: number) => {
-    setActiveBuildingId(buildingId)
+  const handleMarkerClick = useCallback((buildingId: number) => {
+    const targetBuilding = buildings.find((building) => building.id === buildingId)
+    if (!targetBuilding) return
+
+    if (targetBuilding.studySpaces.length > 0) {
+      setActiveStudyBuildingId(buildingId)
+      setActiveRoomBuildingId(null)
+      return
+    }
+
+    if (targetBuilding.rooms.length > 0) {
+      setActiveRoomBuildingId(buildingId)
+      setActiveStudyBuildingId(null)
+      return
+    }
+
+    setActiveStudyBuildingId(null)
+    setActiveRoomBuildingId(null)
+  }, [buildings])
+
+  const handleSetActiveStudyBuilding = (id: number | null) => {
+    setActiveStudyBuildingId(id)
+    if (id !== null) {
+      setActiveRoomBuildingId(null)
+    }
   }
 
-  const handleSetActiveBuildingId = (id: number | null) => {
-    setActiveBuildingId(id)
+  const handleSetActiveRoomBuilding = (id: number | null) => {
+    setActiveRoomBuildingId(id)
+    if (id !== null) {
+      setActiveStudyBuildingId(null)
+    }
   }
 
   if (loading) {
@@ -69,7 +96,7 @@ export default function Home() {
     <div className="flex flex-col sm:flex-row h-screen bg-zinc-900 text-zinc-100 gap-2 p-4">
       <div className="basis-2/5 order-last sm:order-first flex flex-col">
         <div className="h-14 pl-2 pr-4 flex items-center shrink-0">
-          <p className="text-3xl font-medium">Bristol Teaching Spaces</p>
+          <p className="text-3xl font-medium">Bristol University Spots</p>
         </div>
 
         <ScrollArea className="flex-1 py-4 sm:px-0 sm:py-2">
@@ -101,7 +128,16 @@ export default function Home() {
           </Alert>
         )}
 
-        {!error && <BuildingList buildings={buildings} fetchTimestamp={fetchTimestamp} activeBuildingId={activeBuildingId} setActiveBuildingId={handleSetActiveBuildingId} />}
+        {!error && (
+          <BuildingList
+            buildings={buildings}
+            fetchTimestamp={fetchTimestamp}
+            activeStudyBuildingId={activeStudyBuildingId}
+            activeRoomBuildingId={activeRoomBuildingId}
+            setActiveStudyBuilding={handleSetActiveStudyBuilding}
+            setActiveRoomBuilding={handleSetActiveRoomBuilding}
+          />
+        )}
         </ScrollArea>
       </div>
 
