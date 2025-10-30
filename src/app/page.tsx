@@ -102,15 +102,15 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col sm:flex-row h-screen bg-zinc-900 text-zinc-100 gap-2 p-4">
-      <div className="basis-2/5 order-last sm:order-first flex flex-col">
-        <div className="h-14 pl-2 pr-4 flex items-center justify-between gap-4 shrink-0">
+    <div className="flex flex-col sm:flex-row p-2 lg:p-4 h-screen bg-zinc-900 text-zinc-100 gap-0 md:gap-2">
+      <div className="basis-2/5 order-last sm:order-first flex-1 overflow-hidden sm:flex sm:flex-col py-4 sm:px-0 sm:py-2">
+        <div className="h-auto pl-2 pr-4 mb-6 lg:mb-4 flex items-center justify-between gap-4 shrink-0">
           <p className="text-3xl font-medium">Bristol University Spots</p>
           <Dialog>
             <DialogTrigger asChild>
               <button
                 type="button"
-                className="inline-flex cursor-pointer h-8 w-8 items-center justify-center rounded-full border border-zinc-700 text-zinc-300 transition hover:border-zinc-500 hover:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900"
+                className="inline-flex cursor-pointer h-8 w-8 items-center justify-center rounded-full text-zinc-300 transition hover:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900"
                 aria-label="Show app information"
               >
                 <Info className="h-4 w-4" />
@@ -139,7 +139,7 @@ export default function Home() {
           </Dialog>
         </div>
 
-        <ScrollArea className="flex-1 py-4 sm:px-0 sm:py-2">
+        <ScrollArea className="h-full">
         {error && (
           <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
@@ -161,7 +161,7 @@ export default function Home() {
         </ScrollArea>
       </div>
 
-      <div className="basis-3/5 h-[60vh] sm:h-full p-2 sm:p-0 rounded-[20px]">
+      <div className="basis-3/5 h-[40vh] sm:h-full p-2 sm:p-0 rounded-[20px]">
         {!error && <Map buildings={buildings} onBuildingClick={handleMarkerClick} />}
       </div>
     </div>

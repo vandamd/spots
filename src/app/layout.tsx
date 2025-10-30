@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${tiktokSans.variable} antialiased`}>
+      <body className={`${tiktokSans.variable} antialiased bg-zinc-900`}>
         {children}
       </body>
     </html>
