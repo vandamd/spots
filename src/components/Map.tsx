@@ -13,12 +13,17 @@ interface MapProps {
 function getMarkerClass(building: Building) {
   const hasStudySpaces = building.studySpaces.length > 0
   if (hasStudySpaces) {
+    if (building.studyIsOpen === false) {
+      return "h-2 w-2 rounded-full bg-amber-400 shadow-[0px_0px_4px_2px_rgba(251,191,36,0.7)] cursor-pointer"
+    }
     return building.studySpaces.some((space) => (space.available ?? 0) > 0)
       ? "h-2 w-2 rounded-full bg-sky-400 shadow-[0px_0px_4px_2px_rgba(56,189,248,0.7)] cursor-pointer"
       : "h-2 w-2 rounded-full bg-purple-500 shadow-[0px_0px_4px_2px_rgba(168,85,247,0.7)] cursor-pointer"
   }
 
   switch (building.status) {
+    case "closed":
+      return "h-2 w-2 rounded-full bg-amber-400 shadow-[0px_0px_4px_2px_rgba(251,191,36,0.7)] cursor-pointer"
     case "available":
       return "h-2 w-2 rounded-full bg-green-400 shadow-[0px_0px_4px_2px_rgba(34,197,94,0.7)] cursor-pointer"
     case "unavailable":
@@ -113,12 +118,16 @@ export function Map({ buildings, onBuildingClick }: MapProps) {
           <span className="text-sm text-red-300">Unavailable</span>
         </div>
         <div className="flex items-center gap-2">
+          <div className="h-2 w-2 rounded-full bg-amber-400" />
+          <span className="text-sm text-amber-200">Closed</span>
+        </div>
+        <div className="flex items-center gap-2">
           <div className="h-2 w-2 rounded-full bg-sky-400" />
-          <span className="text-sm text-sky-200">Library available</span>
+          <span className="text-sm text-sky-200">Seats available</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="h-2 w-2 rounded-full bg-purple-500" />
-          <span className="text-sm text-purple-200">Library full</span>
+          <span className="text-sm text-purple-200">Seats full</span>
         </div>
       </div>
     </div>

@@ -1,11 +1,15 @@
 export interface Building {
   id: number
   name: string
-  status: 'available' | 'unavailable'
+  status: 'available' | 'unavailable' | 'closed'
   lat: number
   lng: number
   rooms: Room[]
   studySpaces: BuildingStudySpace[]
+  studyOpeningHours: OpeningSlot[] | null
+  teachingOpeningHours: OpeningSlot[] | null
+  studyIsOpen: boolean | null
+  teachingIsOpen: boolean | null
 }
 
 export interface Room {
@@ -27,6 +31,11 @@ export interface BuildingStudySpace {
   available: number | null
   capacity: number | null
   updatedAt: string | null
+}
+
+export interface OpeningSlot {
+  label: string
+  closes: 'Closed' | '24/7' | string
 }
 
 export interface ApiBuildingResponse {

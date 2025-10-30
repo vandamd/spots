@@ -9,6 +9,7 @@ import type {
   Room,
   TimeSlot,
 } from '@/lib/types'
+import { getOpeningHours, getClosingDate, isOpenAt } from '@/data/opening-hours'
 
 const BUILDINGS_API = 'https://www.bris.ac.uk/where-is-my/find/api/v1/building?extended'
 const STATS_API = 'https://www.bris.ac.uk/where-is-my/find/api/v1/free-room-stats'
@@ -25,7 +26,7 @@ export async function GET() {
   try {
     const now = new Date()
     const endOfDay = new Date(now)
-    endOfDay.setHours(18, 0, 0, 0)
+    endOfDay.setHours(23, 59, 59, 999)
 
     const fromDate = now.toISOString().slice(0, 16)
     const toDate = endOfDay.toISOString().slice(0, 16)
@@ -65,6 +66,7 @@ export async function GET() {
     })
 
     const buildingRoomsMap = new Map<number, Room[]>()
+    const teachingHoursCache = new Map<number, ReturnType<typeof getOpeningHours>>()
 
     Object.entries(statsData).forEach(([roomId, bookings]) => {
       const roomInfo = roomMap.get(Number(roomId))
@@ -77,34 +79,56 @@ export async function GET() {
 
       const startTime = new Date(fromDate)
       const endTime = new Date(toDate)
+      let teachingHours = teachingHoursCache.get(roomInfo.buildingId)
+      if (teachingHours === undefined) {
+        teachingHours = getOpeningHours(roomInfo.buildingName, false)
+        teachingHoursCache.set(roomInfo.buildingId, teachingHours)
+      }
+      const closingDate = getClosingDate(teachingHours, now)
+      const effectiveEndTime = closingDate && closingDate < endTime ? new Date(closingDate) : endTime
 
       let currentTime = startTime
 
-      sortedBookings.forEach((booking) => {
-        const bookingStart = new Date(booking.startDateTime)
-        const bookingEnd = new Date(booking.endDateTime)
-
-        if (currentTime < bookingStart) {
-          slots.push({
-            start: currentTime.toISOString(),
-            end: bookingStart.toISOString(),
-            status: 'free',
-          })
+      for (const booking of sortedBookings) {
+        if (currentTime >= effectiveEndTime) {
+          break
         }
 
-        slots.push({
-          start: booking.startDateTime,
-          end: booking.endDateTime,
-          status: 'booked',
-        })
+        const bookingStart = new Date(booking.startDateTime)
+        const bookingEnd = new Date(booking.endDateTime)
+        if (bookingStart >= effectiveEndTime) {
+          break
+        }
 
-        currentTime = bookingEnd > currentTime ? bookingEnd : currentTime
-      })
+        const clampedStart = bookingStart < startTime ? new Date(startTime) : bookingStart
+        const clampedEnd = bookingEnd > effectiveEndTime ? new Date(effectiveEndTime) : bookingEnd
 
-      if (currentTime < endTime) {
+        if (currentTime < clampedStart) {
+          const freeEnd = clampedStart
+          if (currentTime < freeEnd) {
+            slots.push({
+              start: currentTime.toISOString(),
+              end: freeEnd.toISOString(),
+              status: 'free',
+            })
+          }
+          currentTime = new Date(freeEnd)
+        }
+
+        if (clampedEnd > currentTime) {
+          slots.push({
+            start: clampedStart.toISOString(),
+            end: clampedEnd.toISOString(),
+            status: 'booked',
+          })
+          currentTime = new Date(clampedEnd)
+        }
+      }
+
+      if (currentTime < effectiveEndTime) {
         slots.push({
           start: currentTime.toISOString(),
-          end: endTime.toISOString(),
+          end: effectiveEndTime.toISOString(),
           status: 'free',
         })
       }
@@ -158,13 +182,41 @@ export async function GET() {
           room.slots.some((slot) => slot.status === 'free')
         )
         const hasAvailableStudySpace = studySpaces.some((space) => (space.available ?? 0) > 0)
+        const studyOpeningHours =
+          studySpaces.length > 0 ? getOpeningHours(buildingInfo.name, true) : null
+        const teachingOpeningHours =
+          validRooms.length > 0
+            ? teachingHoursCache.get(buildingInfo.id) ?? getOpeningHours(buildingInfo.name, false)
+            : null
+        const studyIsOpen =
+          studySpaces.length > 0 ? isOpenAt(studyOpeningHours, now) ?? true : null
+        const teachingIsOpen =
+          validRooms.length > 0 ? isOpenAt(teachingOpeningHours, now) ?? true : null
+        const studyClosed = studySpaces.length > 0 && studyIsOpen === false
+        const teachingClosed = validRooms.length > 0 && teachingIsOpen === false
+        const isClosed =
+          (studySpaces.length === 0 || studyClosed) && (validRooms.length === 0 || teachingClosed)
+        const effectiveHasAvailableRoom = teachingClosed ? false : hasAvailableRoom
+        const effectiveHasAvailableStudySpace = studyClosed ? false : hasAvailableStudySpace
+        let status: Building['status']
+        if (isClosed) {
+          status = 'closed'
+        } else if (effectiveHasAvailableRoom || effectiveHasAvailableStudySpace) {
+          status = 'available'
+        } else {
+          status = 'unavailable'
+        }
 
         return {
           id: buildingInfo.id,
           name: buildingInfo.name,
-          status: hasAvailableRoom || hasAvailableStudySpace ? 'available' : 'unavailable',
+          status,
           lat: buildingInfo.lat,
           lng: buildingInfo.lng,
+          studyOpeningHours,
+          teachingOpeningHours,
+          studyIsOpen,
+          teachingIsOpen,
           rooms: validRooms,
           studySpaces,
         } satisfies Building

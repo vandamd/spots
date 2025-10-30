@@ -9,8 +9,8 @@ const tiktokSans = TikTok_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "UoB Spaces",
-  description: "University of Bristol Teaching Spaces Availability",
+  title: "Bristol University Spots",
+  description: "University of Bristol study seat and teaching space availability app",
 };
 
 export default function RootLayout({

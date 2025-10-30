@@ -129,17 +129,22 @@ export function BuildingList({
                   }),
                   { available: 0, capacity: 0 }
                 )
-                const badgeText =
-                  totals.capacity > 0
+                const isLibraryClosed = building.studyIsOpen === false
+                const badgeText = isLibraryClosed
+                  ? 'closed'
+                  : totals.capacity > 0
                     ? `${totals.available}/${totals.capacity} seats`
                     : `${totals.available} seats`
+                const badgeClass = isLibraryClosed
+                  ? 'rounded-lg px-2 py-1 text-sm font-normal bg-amber-700/20 text-amber-200/80 hover:bg-amber-700/20'
+                  : 'rounded-lg px-2 py-1 text-sm font-normal bg-sky-800/20 text-sky-200/80 hover:bg-sky-800/20'
 
                 return (
                   <AccordionItem key={`study-${building.id}`} value={`study-building-${building.id}`} id={`study-building-${building.id}`}>
                     <AccordionTrigger className="py-4 text-lg hover:cursor-pointer underline-offset-8">
                       <div className="flex items-center justify-between w-[95%]">
                         <span className="text-left flex-1 hover:underline">{building.name}</span>
-                        <Badge className="rounded-lg px-2 py-1 text-sm font-normal bg-sky-800/20 text-sky-200/80 hover:bg-sky-800/20">
+                        <Badge className={badgeClass}>
                           {badgeText}
                         </Badge>
                       </div>
@@ -148,18 +153,29 @@ export function BuildingList({
                       <div className="space-y-4 pt-2">
                         {building.studySpaces.map((space) => {
                           const availableCount = space.available ?? 0
-                          const isAvailable = availableCount > 0
+                          const isAvailable = !isLibraryClosed && availableCount > 0
+                          const dotClass = isLibraryClosed
+                            ? 'bg-amber-400'
+                            : isAvailable
+                              ? 'bg-green-400'
+                              : 'bg-red-400'
+                          const pillClass = isLibraryClosed
+                            ? 'rounded-lg bg-amber-700/20 px-2 py-1 text-xs text-amber-200/80'
+                            : 'rounded-lg bg-zinc-800/60 px-2 py-1 text-xs text-zinc-100 hover:cursor-pointer'
+                          const pillText = isLibraryClosed
+                            ? 'Closed'
+                            : formatStudySpaceAvailability(space.available, space.capacity)
 
                           return (
                             <div key={space.id} className="flex items-center justify-between text-sm">
                               <div className="flex items-center gap-2">
-                                <div className={`h-[6px] w-[6px] rounded-full ${isAvailable ? 'bg-green-400' : 'bg-red-400'}`} />
+                                <div className={`h-[6px] w-[6px] rounded-full ${dotClass}`} />
                                 <span>{space.name}</span>
                               </div>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <span className="rounded-lg bg-zinc-800/60 px-2 py-1 text-xs text-zinc-100 hover:cursor-pointer">
-                                    {formatStudySpaceAvailability(space.available, space.capacity)}
+                                  <span className={pillClass}>
+                                    {pillText}
                                   </span>
                                 </TooltipTrigger>
                                 <TooltipContent>{formatUpdatedTooltip(space.updatedAt)}</TooltipContent>
@@ -209,28 +225,32 @@ export function BuildingList({
             >
               {roomBuildings.map((building) => {
                 const totalRooms = building.rooms.length
-                const availableNowCount = building.rooms.filter((room) =>
-                  room.slots.some((slot) => slot.status === 'free' && formatTime(slot.start, fetchTimestamp) === 'now')
-                ).length
+                const isTeachingClosed = building.teachingIsOpen === false
+                const availableNowCount = isTeachingClosed
+                  ? 0
+                  : building.rooms.filter((room) =>
+                      room.slots.some((slot) => slot.status === 'free' && formatTime(slot.start, fetchTimestamp) === 'now')
+                    ).length
 
-                const badgeText = availableNowCount === totalRooms && availableNowCount > 0
-                  ? 'available'
+                const badgeText = isTeachingClosed
+                  ? 'closed'
+                  : availableNowCount === totalRooms && availableNowCount > 0
+                    ? 'available'
+                    : availableNowCount > 0
+                      ? `${availableNowCount}/${totalRooms} available`
+                      : 'unavailable'
+                const badgeClass = isTeachingClosed
+                  ? 'rounded-lg px-2 py-1 text-sm w-fit font-normal bg-amber-700/20 text-amber-200/80 hover:bg-amber-700/20'
                   : availableNowCount > 0
-                    ? `${availableNowCount}/${totalRooms} available`
-                    : 'unavailable'
+                    ? 'rounded-lg px-2 py-1 text-sm w-fit font-normal bg-green-800/20 text-green-300/80 hover:bg-green-800/20'
+                    : 'rounded-lg px-2 py-1 text-sm w-fit font-normal bg-red-700/20 text-red-300/80 hover:bg-red-700/20'
 
                 return (
                   <AccordionItem key={building.id} value={`building-${building.id}`} id={`building-${building.id}`}>
                     <AccordionTrigger className="py-4 text-lg hover:cursor-pointer underline-offset-8">
                       <div className="flex items-center justify-between w-[95%]">
                         <span className="text-left flex-1 hover:underline">{building.name}</span>
-                        <Badge
-                          className={`
-                    ${availableNowCount > 0
-                    ? 'bg-green-800/20 text-green-300/80 hover:bg-green-800/20 rounded-lg px-2 py-1 text-sm w-fit'
-                    : 'bg-red-700/20 text-red-300/80 hover:bg-red-700/20 rounded-lg px-2 py-1 text-sm w-fit'
-                    } font-normal`}
-                        >
+                        <Badge className={badgeClass}>
                           {badgeText}
                         </Badge>
                       </div>
@@ -238,6 +258,21 @@ export function BuildingList({
                     <AccordionContent>
                       <div className="space-y-6 pt-2">
                         {building.rooms.filter(room => room.name && room.name.trim() !== '').map((room) => {
+                          if (isTeachingClosed) {
+                            return (
+                              <div key={room.id} className="text-lg flex justify-between items-start">
+                                <div className="flex items-center gap-2">
+                                  <div className="mt-[3px] h-[6px] w-[6px] rounded-full bg-amber-400" />
+                                  <span className="text-sm pt-0.5">{room.name}</span>
+                                </div>
+
+                                <div className="rounded-lg bg-amber-700/20 px-2 py-1 text-xs text-amber-200/80">
+                                  Closed
+                                </div>
+                              </div>
+                            )
+                          }
+
                           const isAvailableNow = room.slots.some((slot) =>
                             slot.status === 'free' && formatTime(slot.start, fetchTimestamp) === 'now'
                           )
