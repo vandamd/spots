@@ -108,7 +108,7 @@ export function Map({ buildings, onBuildingClick }: MapProps) {
   return (
     <div className="h-full w-full relative">
       <div id="map-container" ref={mapContainerRef} />
-      <div className="bg-zinc-800/90 absolute bottom-10 left-2 sm:bottom-8 sm:left-4 flex flex-col gap-2 p-2 rounded-lg text-sm">
+      <div className="bg-zinc-800/90 absolute top-4 left-4 flex flex-col gap-2 p-2 rounded-lg text-sm">
         <div className="flex items-center gap-2">
           <div className="h-2 w-2 rounded-full bg-green-400" />
           <span className="text-sm text-green-300">Available</span>
